@@ -1,0 +1,63 @@
+@page
+@model CEMS.Pages.EnquiriesModel
+@{ ViewData["Title"] = "Enquiries"; }
+
+<h2 class="mb-4"><i class="bi bi-chat-dots me-2"></i>Enquiries</h2>
+
+@if (Model.IsOrganiser)
+{
+    <h4 class="mb-3">Enquiries about my events</h4>
+    @if (!Model.Received.Any())
+    {
+        <div class="alert alert-info">No enquiries received yet.</div>
+    }
+    @foreach (var q in Model.Received)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h6 class="mb-1">@q.Subject</h6>
+                    <span class="badge @(q.Reply == null ? "bg-warning text-dark" : "bg-success")">@(q.Reply == null ? "Needs reply" : "Answered")</span>
+                </div>
+                <p class="small text-muted mb-2">From <strong>@q.User.FullName</strong> (@q.User.Email) about <a href="/Events/Detail?id=@q.EventId">@q.Event.Title</a> &middot; @q.SentAt.ToString("dd MMM yyyy, hh:mm tt")</p>
+                <p class="mb-2">@q.Message</p>
+                @if (q.Reply != null)
+                {
+                    <div class="alert alert-success py-2 mb-0"><strong>Your reply:</strong> @q.Reply</div>
+                }
+                else
+                {
+                    <form method="post" asp-page-handler="Reply" class="d-flex gap-2">
+                        <input type="hidden" name="enquiryId" value="@q.EnquiryId" />
+                        <input type="text" name="reply" class="form-control" placeholder="Write a reply..." required maxlength="1000" />
+                        <button type="submit" class="btn btn-primary">Reply</button>
+                    </form>
+                }
+            </div>
+        </div>
+    }
+    <hr class="my-4" />
+}
+
+<h4 class="mb-3">Enquiries I sent</h4>
+@if (!Model.Sent.Any())
+{
+    <div class="alert alert-info">You have not sent any enquiries. Open an event and use <em>Contact Organiser</em>.</div>
+}
+@foreach (var q in Model.Sent)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <h6 class="mb-1">@q.Subject</h6>
+                <span class="badge @(q.Reply == null ? "bg-secondary" : "bg-success")">@(q.Reply == null ? "Awaiting reply" : "Answered")</span>
+            </div>
+            <p class="small text-muted mb-2">About <a href="/Events/Detail?id=@q.EventId">@q.Event.Title</a> &middot; @q.SentAt.ToString("dd MMM yyyy, hh:mm tt")</p>
+            <p class="mb-2">@q.Message</p>
+            @if (q.Reply != null)
+            {
+                <div class="alert alert-success py-2 mb-0"><strong>Organiser reply:</strong> @q.Reply</div>
+            }
+        </div>
+    </div>
+}

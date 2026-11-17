@@ -1,0 +1,23 @@
+/* CEMS - site styles (Bootstrap 5 is loaded from /lib/bootstrap) */
+html { font-size: 14px; position: relative; min-height: 100%; }
+@media (min-width: 768px) { html { font-size: 16px; } }
+
+body { background: #f0f2f5; margin-bottom: 60px; }
+.navbar-brand { font-weight: 700; letter-spacing: 1px; }
+.card { border: none; box-shadow: 0 1px 3px rgba(0, 0, 0, .1); }
+
+.btn:focus, .btn:active:focus, .form-control:focus, .form-select:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+/* Hide the empty validation summary box */
+.validation-summary-valid { display: none; }
+.validation-summary-errors ul { margin-bottom: 0; }
+
+/* Month calendar */
+.calendar-grid td { height: 110px; width: 14.28%; vertical-align: top; padding: .35rem; }
+.calendar-event { font-weight: 500; text-decoration: none; }
+@media (max-width: 767px) { .calendar-grid td { height: 80px; padding: .15rem; } }
+
+/* Show a red outline on fields flagged by site.js */
+.is-mismatch { border-color: #dc3545 !important; }

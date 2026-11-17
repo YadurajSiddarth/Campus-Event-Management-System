@@ -1,0 +1,60 @@
+@page
+@model CEMS.Pages.Account.ProfileModel
+@{ ViewData["Title"] = "Profile"; }
+
+<div class="row justify-content-center g-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body p-4">
+                <h3 class="mb-4"><i class="bi bi-person-circle me-2"></i>My Profile</h3>
+                <form method="post" asp-page-handler="Profile">
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="FullName" class="form-control" value="@Model.UserProfile.FullName" required maxlength="100" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="Email" class="form-control" value="@Model.UserProfile.Email" required maxlength="150" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <input type="text" class="form-control" value="@Model.UserProfile.Role" disabled />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Department</label>
+                        <input type="text" name="Department" class="form-control" value="@Model.UserProfile.Department" maxlength="100" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contact Number</label>
+                        <input type="text" name="ContactNumber" class="form-control" value="@Model.UserProfile.ContactNumber" maxlength="20" pattern="[0-9+\- ]{8,20}" title="Digits, spaces, + and - only" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body p-4">
+                <h3 class="mb-4"><i class="bi bi-key me-2"></i>Change Password</h3>
+                <form method="post" asp-page-handler="Password">
+                    <div class="mb-3">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" name="CurrentPassword" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="NewPassword" class="form-control" required minlength="8" />
+                        <div class="form-text">At least 8 characters with an uppercase letter, a lowercase letter and a digit.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" name="ConfirmPassword" class="form-control" required data-match="NewPassword" />
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary">Change Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,58 @@
+@page
+@model CEMS.Pages.Events.CreateModel
+@using CEMS.Models
+@{ ViewData["Title"] = "Create Event"; }
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <h3><i class="bi bi-plus-circle me-2"></i>Create New Event</h3>
+                <hr />
+                <form method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="All" class="alert alert-danger py-2"></div>
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label">Event Title</label>
+                            <input type="text" name="Input.Title" class="form-control" value="@Model.Input.Title" required minlength="3" maxlength="200" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Category</label>
+                            <select name="Input.Category" class="form-select" required>
+                                @foreach (var c in EventCategories.All)
+                                {
+                                    <option value="@c" selected="@(Model.Input.Category == c)">@c</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="Input.Description" class="form-control" rows="4" required minlength="10" maxlength="2000">@Model.Input.Description</textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Date &amp; Time</label>
+                            <input type="datetime-local" name="Input.EventDate" class="form-control" value="@Model.Input.EventDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Venue</label>
+                            <input type="text" name="Input.Venue" class="form-control" value="@Model.Input.Venue" required maxlength="200" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Maximum Seats</label>
+                            <input type="number" name="Input.MaxSeats" class="form-control" value="@Model.Input.MaxSeats" min="1" max="10000" required />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Brochures / Resources <span class="text-muted">(optional)</span></label>
+                        <input type="file" name="Files" class="form-control" multiple accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" data-max-mb="5" />
+                        <div class="form-text">PDF, Word or image files, up to 5 MB each.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Create Event</button>
+                    <a href="/Events" class="btn btn-outline-secondary ms-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

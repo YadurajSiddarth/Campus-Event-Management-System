@@ -1,0 +1,99 @@
+@page
+@model CEMS.Pages.ReportsModel
+@{
+    ViewData["Title"] = "Reports & Analytics";
+    var maxReg = Math.Max(1, Model.Popular.Any() ? Model.Popular.Max(p => p.Registered) : 1);
+    var maxCat = Math.Max(1, Model.ByCategory.Any() ? Model.ByCategory.Max(c => c.Registrations) : 1);
+}
+
+<h2 class="mb-4"><i class="bi bi-graph-up me-2"></i>Reports &amp; Analytics</h2>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center p-3"><h3 class="text-primary">@Model.TotalEvents</h3><small class="text-muted">Total Events</small></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3"><h3 class="text-success">@Model.TotalRegistrations</h3><small class="text-muted">Active Registrations</small></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3"><h3 class="text-info">@Model.TotalAttended</h3><small class="text-muted">Attended</small></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3"><h3 class="text-warning">@Model.AvgRating.ToString("F1")</h3><small class="text-muted">Avg Feedback Rating</small></div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><h5 class="mb-0">Event Attendance Summary</h5></div>
+    <div class="card-body p-0 table-responsive">
+        <table class="table table-striped mb-0 align-middle">
+            <thead>
+                <tr><th>Event</th><th>Date</th><th>Status</th><th class="text-end">Capacity</th><th class="text-end">Registered</th><th class="text-end">Attended</th><th class="text-end">Cancelled</th><th class="text-end">Attendance</th><th class="text-end">Rating</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.Rows)
+                {
+                    <tr>
+                        <td><a href="/Events/Detail?id=@r.EventId">@r.Title</a></td>
+                        <td>@r.EventDate.ToString("dd MMM yyyy")</td>
+                        <td><span class="badge @(r.Status == "Active" ? "bg-success" : r.Status == "Cancelled" ? "bg-danger" : "bg-secondary")">@r.Status</span></td>
+                        <td class="text-end">@r.Capacity</td>
+                        <td class="text-end">@r.Registered</td>
+                        <td class="text-end">@r.Attended</td>
+                        <td class="text-end">@r.Cancelled</td>
+                        <td class="text-end">@r.AttendanceRate.ToString("F0")%</td>
+                        <td class="text-end">@(r.FeedbackCount == 0 ? "-" : r.AvgRating.ToString("F1") + " (" + r.FeedbackCount + ")")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0">Popular Events (by registrations)</h5></div>
+            <div class="card-body">
+                @foreach (var p in Model.Popular)
+                {
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between"><span>@p.Title</span><strong>@p.Registered</strong></div>
+                        <div class="progress"><div class="progress-bar" style="width: @(100 * p.Registered / maxReg)%"></div></div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h5 class="mb-0">Registrations by Category</h5></div>
+            <div class="card-body">
+                @foreach (var c in Model.ByCategory)
+                {
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between"><span>@c.Category</span><strong>@c.Registrations</strong></div>
+                        <div class="progress"><div class="progress-bar bg-success" style="width: @(100 * c.Registrations / maxCat)%"></div></div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><h5 class="mb-0">Event Feedback &amp; Evaluation</h5></div>
+            <div class="card-body">
+                @if (!Model.RecentFeedback.Any())
+                {
+                    <p class="text-muted mb-0">No feedback submitted yet.</p>
+                }
+                @foreach (var fb in Model.RecentFeedback)
+                {
+                    <div class="border-bottom pb-2 mb-2">
+                        <strong>@fb.Event.Title</strong> by @fb.User.FullName
+                        <br /><span class="text-warning">@(new string('★', fb.Rating))@(new string('☆', 5 - fb.Rating))</span>
+                        <p class="small mb-0">@fb.Comments</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,95 @@
+@page
+@model CEMS.Pages.Events.EditModel
+@using CEMS.Models
+@{ ViewData["Title"] = "Edit Event"; }
+
+<div class="row justify-content-center g-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <h3><i class="bi bi-pencil-square me-2"></i>Edit Event</h3>
+                <p class="text-muted mb-0">@Model.Event.SeatsTaken participant(s) currently registered. Registered participants are notified when the title, date or venue changes.</p>
+                <hr />
+                <form method="post" enctype="multipart/form-data" asp-route-id="@Model.Event.EventId">
+                    <div asp-validation-summary="All" class="alert alert-danger py-2"></div>
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label">Event Title</label>
+                            <input type="text" name="Input.Title" class="form-control" value="@Model.Input.Title" required minlength="3" maxlength="200" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Category</label>
+                            <select name="Input.Category" class="form-select" required>
+                                @foreach (var c in EventCategories.All)
+                                {
+                                    <option value="@c" selected="@(Model.Input.Category == c)">@c</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="Input.Description" class="form-control" rows="4" required minlength="10" maxlength="2000">@Model.Input.Description</textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Date &amp; Time</label>
+                            <input type="datetime-local" name="Input.EventDate" class="form-control" value="@Model.Input.EventDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Venue</label>
+                            <input type="text" name="Input.Venue" class="form-control" value="@Model.Input.Venue" required maxlength="200" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Maximum Seats</label>
+                            <input type="number" name="Input.MaxSeats" class="form-control" value="@Model.Input.MaxSeats" min="1" max="10000" required />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Add more brochures / resources <span class="text-muted">(optional)</span></label>
+                        <input type="file" name="Files" class="form-control" multiple accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" data-max-mb="5" />
+                        <div class="form-text">PDF, Word or image files, up to 5 MB each.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Save Changes</button>
+                    <a href="/Events/Detail?id=@Model.Event.EventId" class="btn btn-outline-secondary ms-2">Back</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0">Resources</h5></div>
+            <ul class="list-group list-group-flush">
+                @foreach (var r in Model.Event.Resources)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="@r.FilePath" target="_blank" class="text-truncate me-2"><i class="bi bi-file-earmark me-1"></i>@r.FileName</a>
+                        <form method="post" asp-page-handler="DeleteResource" asp-route-id="@Model.Event.EventId" data-confirm="Remove this file?">
+                            <input type="hidden" name="resourceId" value="@r.ResourceId" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </li>
+                }
+                @if (!Model.Event.Resources.Any())
+                {
+                    <li class="list-group-item text-muted">No files uploaded.</li>
+                }
+            </ul>
+        </div>
+
+        @if (Model.Event.Status == "Active")
+        {
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white"><h5 class="mb-0">Cancel Event</h5></div>
+                <div class="card-body">
+                    <p class="small">All registered participants will be notified and their registrations cancelled. This cannot be undone.</p>
+                    <form method="post" asp-page-handler="CancelEvent" asp-route-id="@Model.Event.EventId" data-confirm="Cancel this event for all participants?">
+                        <input type="text" name="reason" class="form-control mb-2" placeholder="Reason (optional)" maxlength="300" />
+                        <button type="submit" class="btn btn-danger w-100">Cancel Event</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</div>

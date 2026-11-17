@@ -1,0 +1,207 @@
+@page
+@model CEMS.Pages.Events.DetailModel
+@{ ViewData["Title"] = Model.Event?.Title ?? "Event Detail"; }
+
+@if (Model.Event == null)
+{
+    <div class="alert alert-warning">Event not found.</div>
+    return;
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="badge bg-info mb-2">@Model.Event.Category</span>
+                        <span class="badge @(Model.Event.Status == "Active" ? "bg-success" : Model.Event.Status == "Cancelled" ? "bg-danger" : "bg-secondary") mb-2">@Model.Event.Status</span>
+                    </div>
+                    @if (Model.CanManage)
+                    {
+                        <div class="btn-group btn-group-sm">
+                            @if (Model.Event.Status == "Active")
+                            {
+                                <a href="/Events/Edit?id=@Model.Event.EventId" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i>Edit / Cancel</a>
+                            }
+                            @if (Model.Event.Status != "Cancelled")
+                            {
+                                <a href="/Events/Attendance?id=@Model.Event.EventId" class="btn btn-outline-success"><i class="bi bi-clipboard-check me-1"></i>Attendance</a>
+                            }
+                        </div>
+                    }
+                </div>
+                <h2>@Model.Event.Title</h2>
+                <p class="text-muted"><i class="bi bi-calendar me-1"></i>@Model.Event.EventDate.ToString("dddd, dd MMMM yyyy, hh:mm tt")</p>
+                <p class="text-muted"><i class="bi bi-geo-alt me-1"></i>@Model.Event.Venue</p>
+                <p class="text-muted"><i class="bi bi-person me-1"></i>Organised by: @Model.Event.Organiser.FullName</p>
+                <hr />
+                <p style="white-space: pre-line">@Model.Event.Description</p>
+
+                @if (Model.Event.Resources.Any())
+                {
+                    <hr />
+                    <h6><i class="bi bi-paperclip me-1"></i>Event Resources</h6>
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var r in Model.Event.Resources)
+                        {
+                            <li><a href="@r.FilePath" target="_blank"><i class="bi bi-file-earmark-arrow-down me-1"></i>@r.FileName</a></li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0">Feedback</h5></div>
+            <div class="card-body">
+                @if (Model.Feedbacks.Any())
+                {
+                    @foreach (var fb in Model.Feedbacks)
+                    {
+                        <div class="border-bottom pb-2 mb-2">
+                            <strong>@fb.User.FullName</strong> <span class="text-warning">@(new string('★', fb.Rating))@(new string('☆', 5 - fb.Rating))</span>
+                            <p class="mb-0 small">@fb.Comments</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted mb-0">No feedback yet.</p>
+                }
+            </div>
+        </div>
+
+        @if (Model.IsLoggedIn && Model.HasAttended && !Model.HasGivenFeedback)
+        {
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Submit Feedback</h5></div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="Feedback">
+                        <input type="hidden" name="eventId" value="@Model.Event.EventId" />
+                        <div class="mb-3">
+                            <label class="form-label">Rating</label>
+                            <select name="rating" class="form-select" required>
+                                @for (int i = 5; i >= 1; i--) { <option value="@i">@i Star@(i > 1 ? "s" : "")</option> }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Comments</label>
+                            <textarea name="comments" class="form-control" rows="3" maxlength="1000"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                    </form>
+                </div>
+            </div>
+        }
+
+        <div class="card">
+            <div class="card-header"><h5 class="mb-0">Contact Organiser</h5></div>
+            <div class="card-body">
+                @if (Model.IsLoggedIn)
+                {
+                    <form method="post" asp-page-handler="Enquiry">
+                        <input type="hidden" name="eventId" value="@Model.Event.EventId" />
+                        <div class="mb-3">
+                            <label class="form-label">Subject</label>
+                            <input type="text" name="subject" class="form-control" required maxlength="200" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea name="message" class="form-control" rows="3" required maxlength="1000"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary">Send Enquiry</button>
+                    </form>
+
+                    @if (Model.MyEnquiries.Any())
+                    {
+                        <hr />
+                        <h6>Your enquiries about this event</h6>
+                        @foreach (var q in Model.MyEnquiries)
+                        {
+                            <div class="border rounded p-2 mb-2">
+                                <strong>@q.Subject</strong> <small class="text-muted">@q.SentAt.ToString("dd MMM yyyy, hh:mm tt")</small>
+                                <p class="mb-1 small">@q.Message</p>
+                                @if (q.Reply != null)
+                                {
+                                    <div class="alert alert-success py-1 px-2 mb-0 small"><strong>Organiser reply:</strong> @q.Reply</div>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Awaiting reply</span>
+                                }
+                            </div>
+                        }
+                    }
+                }
+                else
+                {
+                    <p class="text-muted mb-0"><a href="/Account/Login">Login</a> to contact the organiser.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h4>@Model.SeatsLeft / @Model.Event.MaxSeats</h4>
+                <p class="text-muted">Seats Remaining</p>
+                <div class="progress mb-3">
+                    @{ var pct = (int)(100.0 * (Model.Event.MaxSeats - Model.SeatsLeft) / Model.Event.MaxSeats); }
+                    <div class="progress-bar" style="width: @pct%"></div>
+                </div>
+
+                @if (Model.Event.Status == "Cancelled")
+                {
+                    <span class="btn btn-danger w-100 disabled">Event Cancelled</span>
+                }
+                else if (Model.IsLoggedIn)
+                {
+                    @if (Model.MyRegistration != null)
+                    {
+                        <span class="btn btn-success w-100 disabled mb-3"><i class="bi bi-check-circle me-1"></i>Already Registered</span>
+
+                        @if (Model.Event.EventDate > DateTime.Now)
+                        {
+                            <form method="post" asp-page-handler="Update" class="text-start mb-2">
+                                <input type="hidden" name="eventId" value="@Model.Event.EventId" />
+                                <input type="hidden" name="registrationId" value="@Model.MyRegistration.RegistrationId" />
+                                <label class="form-label small mb-1">My remarks (e.g. dietary needs)</label>
+                                <input type="text" name="remarks" class="form-control form-control-sm mb-2" value="@Model.MyRegistration.Remarks" maxlength="200" />
+                                <button type="submit" class="btn btn-sm btn-outline-primary w-100">Update Registration</button>
+                            </form>
+                            <form method="post" asp-page-handler="Cancel" data-confirm="Cancel your registration?">
+                                <input type="hidden" name="eventId" value="@Model.Event.EventId" />
+                                <input type="hidden" name="registrationId" value="@Model.MyRegistration.RegistrationId" />
+                                <input type="text" name="reason" class="form-control form-control-sm mb-2" placeholder="Reason (optional)" maxlength="300" />
+                                <button type="submit" class="btn btn-outline-danger w-100">Cancel Registration</button>
+                            </form>
+                        }
+                    }
+                    else if (Model.Event.Status != "Active" || Model.Event.EventDate <= DateTime.Now)
+                    {
+                        <span class="btn btn-secondary w-100 disabled">Registration Closed</span>
+                    }
+                    else if (Model.SeatsLeft <= 0)
+                    {
+                        <span class="btn btn-secondary w-100 disabled">Event Full</span>
+                    }
+                    else
+                    {
+                        <form method="post" asp-page-handler="Register" class="text-start">
+                            <input type="hidden" name="eventId" value="@Model.Event.EventId" />
+                            <label class="form-label small mb-1">Remarks (optional)</label>
+                            <input type="text" name="remarks" class="form-control form-control-sm mb-2" placeholder="e.g. dietary needs" maxlength="200" />
+                            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check2-circle me-1"></i>Register Now</button>
+                        </form>
+                    }
+                }
+                else
+                {
+                    <a href="/Account/Login" class="btn btn-outline-primary w-100">Login to Register</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

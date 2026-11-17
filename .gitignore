@@ -1,0 +1,24 @@
+# macOS and operating system files
+.DS_Store
+.Rhistory
+Thumbs.db
+
+# IDE files
+.vs/
+.vscode/
+.idea/
+.claude/
+*.user
+*.suo
+
+# Build output
+**/bin/
+**/obj/
+
+# Local databases and configuration
+*.db
+appsettings.Local.json
+
+# Runtime event uploads
+CEMS/wwwroot/uploads/events/*
+!CEMS/wwwroot/uploads/events/.gitkeep

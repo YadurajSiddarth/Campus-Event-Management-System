@@ -1,0 +1,60 @@
+@page
+@model CEMS.Pages.Events.HistoryModel
+@{ ViewData["Title"] = "My Registrations"; }
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-clock-history me-2"></i>My Registration History</h2>
+    <a href="/Events/Logs" class="btn btn-outline-secondary"><i class="bi bi-journal-text me-1"></i>View Change Log</a>
+</div>
+
+@if (!Model.Registrations.Any())
+{
+    <div class="alert alert-info">You haven't registered for any events yet. <a href="/Events">Browse events</a></div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover bg-white rounded align-middle">
+            <thead class="table-primary">
+                <tr><th>Event</th><th>Date</th><th>Status</th><th>Registered At</th><th>Remarks</th><th style="min-width:260px">Actions</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.Registrations)
+                {
+                    var badge = r.Status switch { "Registered" => "bg-success", "Attended" => "bg-primary", "Cancelled" => "bg-danger", _ => "bg-secondary" };
+                    var canChange = r.Status == "Registered" && r.Event.EventDate > DateTime.Now;
+                    <tr>
+                        <td><a href="/Events/Detail?id=@r.EventId">@r.Event.Title</a><br /><small class="text-muted">@r.Event.Venue</small></td>
+                        <td>@r.Event.EventDate.ToString("dd MMM yyyy")</td>
+                        <td><span class="badge @badge">@r.Status</span></td>
+                        <td>@r.RegisteredAt.ToString("dd MMM yyyy, hh:mm tt")</td>
+                        <td>@r.Remarks</td>
+                        <td>
+                            @if (canChange)
+                            {
+                                <form method="post" asp-page-handler="Update" class="d-flex gap-1 mb-1">
+                                    <input type="hidden" name="registrationId" value="@r.RegistrationId" />
+                                    <input type="text" name="remarks" class="form-control form-control-sm" value="@r.Remarks" placeholder="Remarks" maxlength="200" />
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
+                                </form>
+                                <form method="post" asp-page-handler="Cancel" class="d-flex gap-1" data-confirm="Cancel this registration?">
+                                    <input type="hidden" name="registrationId" value="@r.RegistrationId" />
+                                    <input type="text" name="reason" class="form-control form-control-sm" placeholder="Reason (optional)" maxlength="300" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                                </form>
+                            }
+                            else if (r.Status == "Cancelled")
+                            {
+                                <small class="text-muted">@r.CancelReason</small>
+                            }
+                            else if (r.Status == "Attended")
+                            {
+                                <a href="/Events/Detail?id=@r.EventId" class="btn btn-sm btn-outline-primary">Give feedback</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

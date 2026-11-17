@@ -1,0 +1,88 @@
+@page
+@model CEMS.Pages.Events.CalendarModel
+@{
+    ViewData["Title"] = "Events Calendar";
+    var first = new DateTime(Model.Year, Model.Month, 1);
+    var offset = (int)first.DayOfWeek;
+    var daysInMonth = DateTime.DaysInMonth(Model.Year, Model.Month);
+    var prev = first.AddMonths(-1);
+    var next = first.AddMonths(1);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0"><i class="bi bi-calendar3 me-2"></i>Events Calendar</h2>
+    <div class="btn-group">
+        <a class="btn btn-outline-primary" href="/Events/Calendar?year=@prev.Year&month=@prev.Month"><i class="bi bi-chevron-left"></i></a>
+        <span class="btn btn-primary disabled">@first.ToString("MMMM yyyy")</span>
+        <a class="btn btn-outline-primary" href="/Events/Calendar?year=@next.Year&month=@next.Month"><i class="bi bi-chevron-right"></i></a>
+    </div>
+</div>
+
+<div class="table-responsive mb-4">
+    <table class="table table-bordered calendar-grid bg-white mb-0">
+        <thead class="table-primary">
+            <tr>
+                @foreach (var d in new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" })
+                {
+                    <th class="text-center">@d</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (int rowStart = 0; rowStart < offset + daysInMonth; rowStart += 7)
+            {
+                <tr>
+                    @for (int cell = rowStart; cell < rowStart + 7; cell++)
+                    {
+                        var day = cell - offset + 1;
+                        if (day < 1 || day > daysInMonth)
+                        {
+                            <td class="bg-light"></td>
+                        }
+                        else
+                        {
+                            var date = new DateTime(Model.Year, Model.Month, day);
+                            var todays = Model.MonthEvents.Where(e => e.EventDate.Date == date).ToList();
+                            <td class="@(date == DateTime.Today ? "table-warning" : "")">
+                                <div class="small fw-bold text-muted">@day</div>
+                                @foreach (var e in todays)
+                                {
+                                    <a href="/Events/Detail?id=@e.EventId" class="calendar-event badge text-bg-primary text-start text-wrap d-block mb-1" title="@e.Title - @e.Venue">@e.EventDate.ToString("hh:mm tt") @e.Title</a>
+                                }
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<h4 class="mb-3">Upcoming Events</h4>
+@if (!Model.Upcoming.Any())
+{
+    <div class="alert alert-info">There are no upcoming events.</div>
+}
+<div class="row g-3">
+    @foreach (var ev in Model.Upcoming)
+    {
+        var badgeClass = ev.Category switch { "Seminar" => "bg-primary", "Workshop" => "bg-success", "Sports" => "bg-warning text-dark", _ => "bg-info" };
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-header bg-white d-flex justify-content-between">
+                    <span class="badge @badgeClass">@ev.Category</span>
+                    <small class="text-muted">@ev.EventDate.ToString("dd MMM yyyy")</small>
+                </div>
+                <div class="card-body">
+                    <h5>@ev.Title</h5>
+                    <p class="mb-1"><i class="bi bi-clock me-1"></i>@ev.EventDate.ToString("hh:mm tt")</p>
+                    <p class="mb-1"><i class="bi bi-geo-alt me-1"></i>@ev.Venue</p>
+                    <p class="mb-0"><i class="bi bi-people me-1"></i>@ev.SeatsTaken / @ev.MaxSeats registered</p>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="/Events/Detail?id=@ev.EventId" class="btn btn-sm btn-outline-primary">Details</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

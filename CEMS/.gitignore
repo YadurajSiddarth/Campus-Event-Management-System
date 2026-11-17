@@ -1,0 +1,9 @@
+bin/
+obj/
+.vs/
+*.user
+*.db
+appsettings.Local.json
+# Files uploaded while using the app (the seeded sample brochure in uploads/seed is kept)
+wwwroot/uploads/events/*
+!wwwroot/uploads/events/.gitkeep

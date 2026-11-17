@@ -1,0 +1,27 @@
+@page
+@model CEMS.Pages.NotificationsModel
+@{ ViewData["Title"] = "Notifications"; }
+
+<h2 class="mb-4"><i class="bi bi-bell me-2"></i>Notifications</h2>
+
+@if (!Model.Items.Any())
+{
+    <div class="alert alert-info">No notifications.</div>
+}
+else
+{
+    <form method="post" class="mb-3">
+        <button type="submit" class="btn btn-sm btn-outline-primary">Mark All as Read</button>
+    </form>
+    <div class="list-group">
+        @foreach (var n in Model.Items)
+        {
+            <div class="list-group-item @(n.IsRead ? "" : "list-group-item-primary")">
+                <div class="d-flex justify-content-between">
+                    <p class="mb-0">@n.Message</p>
+                    <small class="text-muted">@n.CreatedAt.ToString("dd MMM, hh:mm tt")</small>
+                </div>
+            </div>
+        }
+    </div>
+}
