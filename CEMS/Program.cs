@@ -7,8 +7,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 
 // Microsoft SQL Server (LocalDB by default - see ConnectionStrings:Default in appsettings.json)
+var databaseProvider = builder.Configuration["DatabaseProvider"];
+if (string.IsNullOrWhiteSpace(databaseProvider))
+{
+    databaseProvider = OperatingSystem.IsWindows() ? "SqlServer" : "SQLite";
+}
+
 builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+{
+    if (databaseProvider.Equals("SQLite", StringComparison.OrdinalIgnoreCase))
+    {
+        opt.UseSqlite(builder.Configuration.GetConnectionString("SQLite"));
+    }
+    else
+    {
+        opt.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+    }
+});
 
 // Session control (30 minute idle timeout)
 builder.Services.AddSession(opt =>
